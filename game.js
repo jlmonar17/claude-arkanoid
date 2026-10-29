@@ -29,7 +29,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 const state = {
-  phase: 'ready', // 'ready' | 'playing' | 'won' | 'gameover'
+  phase: 'ready', // 'ready' | 'playing' | 'levelcomplete' | 'won' | 'gameover'
   level: 1, // 1..LEVELS.length
   score: 0,
   lives: INITIAL_LIVES,
@@ -213,7 +213,8 @@ function update(dt) {
     collideBallWithPaddle();
     collideBallWithBlocks();
     if (state.blocks.every((blk) => !blk.alive)) {
-      if (state.explosions.length === 0) state.phase = 'won'; // espera a que termine la última explosión
+      // espera a que termine la última explosión
+      if (state.explosions.length === 0) state.phase = state.level < LEVELS.length ? 'levelcomplete' : 'won';
     } else if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
   }
 }
@@ -232,8 +233,23 @@ function draw() {
   const b = state.ball;
   drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
   drawHud();
-  if (state.phase === 'won') drawEndScreen('¡Victoria!');
+  if (state.phase === 'levelcomplete') drawLevelComplete();
+  else if (state.phase === 'won') drawEndScreen('¡Victoria!');
   else if (state.phase === 'gameover') drawEndScreen('Game Over');
+}
+
+function drawLevelComplete() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 56px sans-serif';
+  ctx.fillText('Nivel completado', CANVAS_W / 2, CANVAS_H / 2 - 50);
+  ctx.font = '28px sans-serif';
+  ctx.fillText('Puntaje: ' + state.score, CANVAS_W / 2, CANVAS_H / 2 + 10);
+  ctx.font = '20px sans-serif';
+  ctx.fillText('Clic o barra espaciadora para continuar', CANVAS_W / 2, CANVAS_H / 2 + 60);
 }
 
 function drawEndScreen(title) {
