@@ -9,7 +9,8 @@ Spec 01 (`specs/01-arkanoid-mvp.md`) implements a playable MVP in the browser (H
 - Run: serve the repo root with a static server (e.g. `python3 -m http.server 8000`) and open `http://localhost:8000`. Do not use `file://` (the sprite PNG would taint the canvas).
 - `game.js` keeps all state in a single `state` object (`phase`: `ready | playing | won | gameover`) and runs a `requestAnimationFrame` loop started inside the `loadSpritesheet` callback.
 - No package manager, linter or automated tests exist; verification is manual in the browser.
-- Not used yet: `assets/sounds/*`, `EXPLOSION_FRAMES` / `EXPLOSION_DURATION` (out of scope for spec 01).
+- Block explosions (spec 02): breaking a block pushes `{ x, y, w, h, color, elapsed }` into `state.explosions`; `updateExplosions(dt)` advances them in every phase and `draw` renders them with `EXPLOSION_FRAMES` / `EXPLOSION_DURATION`. `won` is only reached once no blocks and no explosions remain.
+- Not used yet: `assets/sounds/*` (sound is out of scope for specs 01 and 02).
 
 ## Assets
 
