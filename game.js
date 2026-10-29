@@ -1,7 +1,17 @@
 const CANVAS_W = 800;
 const CANVAS_H = 600;
 
-const BLOCK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'gray']; // de arriba abajo
+const LEVELS = [
+  // 7 cadenas de 10 caracteres por nivel; '.' = hueco, la letra es el color del bloque
+  // R=red C=cyan G=green M=magenta Y=yellow H=hotpink K=gray
+  ['RRRRRRRRRR', 'CCCCCCCCCC', 'GGGGGGGGGG', 'MMMMMMMMMM', 'YYYYYYYYYY', 'HHHHHHHHHH', 'KKKKKKKKKK'], // 70
+  ['....RR....', '...CCCC...', '..GGGGGG..', '.MMMMMMMM.', 'YYYYYYYYYY', '.HHHHHHHH.', '..KKKKKK..'], // 44
+  ['R.R.R.R.R.', '.C.C.C.C.C', 'G.G.G.G.G.', '.M.M.M.M.M', 'Y.Y.Y.Y.Y.', '.H.H.H.H.H', 'K.K.K.K.K.'], // 35
+  ['RRRRRRRRRR', 'C..CCCC..C', 'G..GGGG..G', 'M..MMMM..M', 'Y..YYYY..Y', 'H..HHHH..H', 'K........K'], // 42
+  ['RRRRRRRRRR', 'CC.CCCC.CC', 'GGGGGGGGGG', 'MM.MMMM.MM', 'YYYYYYYYYY', 'HH.HHHH.HH', 'KKKKKKKKKK'], // 64
+];
+const LEVEL_COLOR_KEYS = { R: 'red', C: 'cyan', G: 'green', M: 'magenta', Y: 'yellow', H: 'hotpink', K: 'gray' };
+
 const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
 
 const POINTS_PER_BLOCK = 10;
@@ -17,6 +27,7 @@ const ctx = canvas.getContext('2d');
 
 const state = {
   phase: 'ready', // 'ready' | 'playing' | 'won' | 'gameover'
+  level: 1, // 1..LEVELS.length
   score: 0,
   lives: INITIAL_LIVES,
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
@@ -28,16 +39,18 @@ const state = {
 
 let lastTime = 0;
 
-function createBlocks() {
+function createBlocks(level) {
+  const layout = LEVELS[level - 1];
   const blocks = [];
   for (let row = 0; row < GRID.rows; row++) {
     for (let col = 0; col < GRID.cols; col++) {
+      if (layout[row][col] === '.') continue;
       blocks.push({
         x: GRID.offsetX + col * (GRID.blockW + GRID.gap),
         y: GRID.offsetY + row * (GRID.blockH + GRID.gap),
         w: GRID.blockW,
         h: GRID.blockH,
-        color: BLOCK_COLORS[row],
+        color: LEVEL_COLOR_KEYS[layout[row][col]],
         alive: true,
       });
     }
@@ -78,7 +91,8 @@ function launchBall() {
 }
 
 function resetGame() {
-  state.blocks = createBlocks();
+  state.level = 1;
+  state.blocks = createBlocks(state.level);
   state.explosions = [];
   state.score = 0;
   state.lives = INITIAL_LIVES;
