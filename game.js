@@ -36,6 +36,7 @@ const ctx = canvas.getContext('2d');
 const state = {
   phase: 'ready', // 'ready' | 'playing' | 'levelcomplete' | 'won' | 'gameover'
   level: 1, // 1..LEVELS.length
+  paused: false, // solo puede ser true mientras phase === 'playing'
   score: 0,
   lives: INITIAL_LIVES,
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
@@ -229,7 +230,12 @@ function updateExplosions(dt) {
   state.explosions = state.explosions.filter((e) => e.elapsed < EXPLOSION_DURATION);
 }
 
+function togglePause() {
+  if (state.phase === 'playing' || state.paused) state.paused = !state.paused;
+}
+
 function update(dt) {
+  if (state.paused) return;
   updatePaddle(dt);
   updateExplosions(dt);
   if (state.phase === 'ready') {
@@ -259,9 +265,22 @@ function draw() {
   const b = state.ball;
   drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
   drawHud();
-  if (state.phase === 'levelcomplete') drawLevelComplete();
+  if (state.paused) drawPause();
+  else if (state.phase === 'levelcomplete') drawLevelComplete();
   else if (state.phase === 'won') drawEndScreen('¡Victoria!');
   else if (state.phase === 'gameover') drawEndScreen('Game Over');
+}
+
+function drawPause() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 56px sans-serif';
+  ctx.fillText('Pausa', CANVAS_W / 2, CANVAS_H / 2 - 20);
+  ctx.font = '20px sans-serif';
+  ctx.fillText('P o Escape para reanudar', CANVAS_W / 2, CANVAS_H / 2 + 30);
 }
 
 function drawLevelComplete() {
@@ -323,6 +342,10 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') {
     e.preventDefault();
     if (!e.repeat) handleAction();
+    return;
+  }
+  if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+    if (!e.repeat) togglePause();
     return;
   }
   if (LEFT_KEYS.includes(e.key)) {
