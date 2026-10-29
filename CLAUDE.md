@@ -7,17 +7,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Spec 01 (`specs/01-arkanoid-mvp.md`) implements a playable MVP in the browser (HTML + Canvas + JS, no modules or build): `index.html` loads `assets/spritesheet.js` and `game.js` with plain `<script>` tags. The stack decision is settled: browser/Canvas, not Pygame (the README describes this).
 
 - Run: serve the repo root with a static server (e.g. `python3 -m http.server 8000`) and open `http://localhost:8000`. Do not use `file://` (the sprite PNG would taint the canvas).
-- `game.js` keeps all state in a single `state` object (`phase`: `ready | playing | won | gameover`) and runs a `requestAnimationFrame` loop started inside the `loadSpritesheet` callback.
+- `game.js` keeps all state in a single `state` object (`phase`: `ready | playing | levelcomplete | won | gameover`) and runs a `requestAnimationFrame` loop started inside the `loadSpritesheet` callback.
+- Levels (spec 03): `LEVELS` holds 5 text layouts (7 strings of 10 chars, `.` = gap, letters map through `LEVEL_COLOR_KEYS`); `state.level` is the current one. `loadLevel(n)` rebuilds blocks, sets `state.ball.speed` via `levelSpeed(n)` (360 + 10 % of base per level), clears explosions and returns to `ready`, keeping score and lives. Clearing a level goes to `levelcomplete` (click/space → next level) or `won` on level 5; `resetGame` restarts at level 1.
+- Pause and level jump (spec 03): `state.paused` (only while `playing`) is toggled by `togglePause()` with `P`/`Escape`; `update` returns early when paused while `draw` keeps running. `jumpToLevel(n)` (keys `1`–`5`, any phase) unpauses and calls `loadLevel`; from `won`/`gameover` it also resets score and lives.
+- Sound (spec 03): `SOUNDS.bounce` (paddle, side walls, ceiling) and `SOUNDS.break` (block hit, no bounce sound) are played through `playSound`, which restarts the clip and swallows playback errors.
 - No package manager, linter or automated tests exist; verification is manual in the browser.
 - Block explosions (spec 02): breaking a block pushes `{ x, y, w, h, color, elapsed }` into `state.explosions`; `updateExplosions(dt)` advances them in every phase and `draw` renders them with `EXPLOSION_FRAMES` / `EXPLOSION_DURATION`. `won` is only reached once no blocks and no explosions remain.
-- Not used yet: `assets/sounds/*` (sound is out of scope for specs 01 and 02).
 
 ## Assets
 
 - `assets/spritesheet-breakout.png` — single sprite atlas. `assets/spritesheet.js` is the coordinate map for it.
 - `assets/spritesheet.js` globals: `SPRITES` (`paddle`, `ball`, `blocks.<color>`), `EXPLOSION_FRAMES` (4 frames per color), `EXPLOSION_DURATION` (150 ms), plus loader/draw helpers `drawFrame(ctx, frame, x, y, w, h)` and `drawSprite(ctx, name, x, y, w, h)` (`name` is `paddle`, `ball` or `block_<color>`). Draw helpers silently no-op until the image is loaded (`ssLoaded`); the loader re-slices the PNG through an offscreen canvas and fires queued `ssCallbacks`. Image path is hard-coded relative to the page: `assets/spritesheet-breakout.png`, so serve the HTML from the repo root.
 - Block colors: red, cyan, green, magenta, yellow, hotpink, gray. Note `EXPLOSION_FRAMES.gray` reuses the red frames.
-- `assets/sounds/ball-bounce.mp3`, `assets/sounds/break-sound.mp3` — bounce and block-break SFX.
+- `assets/sounds/ball-bounce.mp3`, `assets/sounds/break-sound.mp3` — bounce and block-break SFX, used by `game.js` since spec 03.
 
 ## Spec-driven workflow
 
