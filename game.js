@@ -5,6 +5,7 @@ const BLOCK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'g
 const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
 
 const POINTS_PER_BLOCK = 10;
+const INITIAL_LIVES = 3;
 
 const MAX_DT = 0.05;
 const MAX_BOUNCE_ANGLE = 60 * Math.PI / 180; // respecto a la vertical, en el borde de la pala
@@ -15,6 +16,7 @@ const ctx = canvas.getContext('2d');
 const state = {
   phase: 'ready', // 'ready' | 'playing' | 'won' | 'gameover'
   score: 0,
+  lives: INITIAL_LIVES,
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
   ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: 360 }, // x,y = centro, velocidades en px/s
   blocks: [],
@@ -146,6 +148,16 @@ function collideBallWithBlocks() {
   }
 }
 
+function loseLife() {
+  state.lives -= 1;
+  if (state.lives <= 0) {
+    state.phase = 'gameover';
+  } else {
+    state.phase = 'ready';
+    stickBallToPaddle();
+  }
+}
+
 function update(dt) {
   updatePaddle(dt);
   if (state.phase === 'ready') {
@@ -154,6 +166,7 @@ function update(dt) {
     updateBall(dt);
     collideBallWithPaddle();
     collideBallWithBlocks();
+    if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
   }
 }
 
@@ -166,6 +179,17 @@ function draw() {
   drawSprite(ctx, 'paddle', p.x, p.y, p.w, p.h);
   const b = state.ball;
   drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+  drawHud();
+}
+
+function drawHud() {
+  ctx.fillStyle = '#fff';
+  ctx.font = '20px sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('Puntaje: ' + state.score, GRID.offsetX, 30);
+  ctx.textAlign = 'right';
+  ctx.fillText('Vidas: ' + state.lives, CANVAS_W - GRID.offsetX, 30);
 }
 
 canvas.addEventListener('mousedown', launchBall);
