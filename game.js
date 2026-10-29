@@ -4,6 +4,8 @@ const CANVAS_H = 600;
 const BLOCK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'gray']; // de arriba abajo
 const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
 
+const POINTS_PER_BLOCK = 10;
+
 const MAX_DT = 0.05;
 const MAX_BOUNCE_ANGLE = 60 * Math.PI / 180; // respecto a la vertical, en el borde de la pala
 
@@ -12,6 +14,7 @@ const ctx = canvas.getContext('2d');
 
 const state = {
   phase: 'ready', // 'ready' | 'playing' | 'won' | 'gameover'
+  score: 0,
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
   ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: 360 }, // x,y = centro, velocidades en px/s
   blocks: [],
@@ -105,6 +108,44 @@ function collideBallWithPaddle() {
   b.y = p.y - b.r;
 }
 
+function collideBallWithBlocks() {
+  const b = state.ball;
+  for (const blk of state.blocks) {
+    if (!blk.alive) continue;
+
+    // Punto del bloque más cercano al centro de la bola.
+    const cx = Math.max(blk.x, Math.min(b.x, blk.x + blk.w));
+    const cy = Math.max(blk.y, Math.min(b.y, blk.y + blk.h));
+    const dx = b.x - cx;
+    const dy = b.y - cy;
+    if (dx * dx + dy * dy > b.r * b.r) continue;
+
+    blk.alive = false;
+    state.score += POINTS_PER_BLOCK;
+
+    // El eje con menor penetración es el del impacto; se empuja la bola fuera y se invierte ese eje.
+    const fromLeft = b.x + b.r - blk.x;
+    const fromRight = blk.x + blk.w - (b.x - b.r);
+    const fromTop = b.y + b.r - blk.y;
+    const fromBottom = blk.y + blk.h - (b.y - b.r);
+    const min = Math.min(fromLeft, fromRight, fromTop, fromBottom);
+    if (min === fromLeft) {
+      b.x = blk.x - b.r;
+      b.vx = -Math.abs(b.vx);
+    } else if (min === fromRight) {
+      b.x = blk.x + blk.w + b.r;
+      b.vx = Math.abs(b.vx);
+    } else if (min === fromTop) {
+      b.y = blk.y - b.r;
+      b.vy = -Math.abs(b.vy);
+    } else {
+      b.y = blk.y + blk.h + b.r;
+      b.vy = Math.abs(b.vy);
+    }
+    return; // un bloque por fotograma evita invertir el mismo eje dos veces
+  }
+}
+
 function update(dt) {
   updatePaddle(dt);
   if (state.phase === 'ready') {
@@ -112,6 +153,7 @@ function update(dt) {
   } else if (state.phase === 'playing') {
     updateBall(dt);
     collideBallWithPaddle();
+    collideBallWithBlocks();
   }
 }
 
