@@ -25,6 +25,11 @@ const EXPLOSION_FRAME_COUNT = 4; // longitud de cada EXPLOSION_FRAMES[color]
 const MAX_DT = 0.05;
 const MAX_BOUNCE_ANGLE = 60 * Math.PI / 180; // respecto a la vertical, en el borde de la pala
 
+const SOUNDS = {
+  bounce: new Audio('assets/sounds/ball-bounce.mp3'),
+  break: new Audio('assets/sounds/break-sound.mp3'),
+};
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
@@ -59,6 +64,16 @@ function createBlocks(level) {
     }
   }
   return blocks;
+}
+
+// Reinicia el sonido si ya estaba sonando; un fallo de carga o reproducción no rompe el juego.
+function playSound(sound) {
+  try {
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  } catch (err) {
+    // el audio no está disponible: se ignora
+  }
 }
 
 function clampPaddle() {
@@ -153,6 +168,7 @@ function collideBallWithPaddle() {
   b.vx = b.speed * Math.sin(angle);
   b.vy = -b.speed * Math.cos(angle);
   b.y = p.y - b.r;
+  playSound(SOUNDS.bounce);
 }
 
 function collideBallWithBlocks() {
