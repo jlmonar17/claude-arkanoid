@@ -176,8 +176,14 @@ function loseLife() {
   }
 }
 
+function updateExplosions(dt) {
+  for (const e of state.explosions) e.elapsed += dt * 1000;
+  state.explosions = state.explosions.filter((e) => e.elapsed < EXPLOSION_DURATION);
+}
+
 function update(dt) {
   updatePaddle(dt);
+  updateExplosions(dt);
   if (state.phase === 'ready') {
     stickBallToPaddle();
   } else if (state.phase === 'playing') {
