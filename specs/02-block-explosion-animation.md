@@ -1,6 +1,6 @@
 # SPEC 02 — Animación de explosión al romper bloques
 
-> **Estado:** Borrador
+> **Estado:** Aprobado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-10-29
 > **Objetivo:** Reproducir sobre cada bloque roto la animación de 4 frames de `EXPLOSION_FRAMES` durante `EXPLOSION_DURATION` ms, en lugar de hacerlo desaparecer de golpe.

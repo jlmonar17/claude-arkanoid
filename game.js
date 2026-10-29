@@ -7,6 +7,8 @@ const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, o
 const POINTS_PER_BLOCK = 10;
 const INITIAL_LIVES = 3;
 
+const EXPLOSION_FRAME_COUNT = 4; // longitud de cada EXPLOSION_FRAMES[color]
+
 const MAX_DT = 0.05;
 const MAX_BOUNCE_ANGLE = 60 * Math.PI / 180; // respecto a la vertical, en el borde de la pala
 
@@ -20,6 +22,7 @@ const state = {
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
   ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: 360 }, // x,y = centro, velocidades en px/s
   blocks: [],
+  explosions: [], // { x, y, w, h, color, elapsed } con elapsed en ms desde la rotura
   input: { lastSource: 'mouse', mouseX: CANVAS_W / 2, left: false, right: false },
 };
 
@@ -76,6 +79,7 @@ function launchBall() {
 
 function resetGame() {
   state.blocks = createBlocks();
+  state.explosions = [];
   state.score = 0;
   state.lives = INITIAL_LIVES;
   state.phase = 'ready';
