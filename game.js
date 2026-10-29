@@ -140,6 +140,7 @@ function collideBallWithBlocks() {
     if (dx * dx + dy * dy > b.r * b.r) continue;
 
     blk.alive = false;
+    state.explosions.push({ x: blk.x, y: blk.y, w: blk.w, h: blk.h, color: blk.color, elapsed: 0 });
     state.score += POINTS_PER_BLOCK;
 
     // El eje con menor penetración es el del impacto; se empuja la bola fuera y se invierte ese eje.
