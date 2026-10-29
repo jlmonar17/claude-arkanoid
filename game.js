@@ -143,13 +143,16 @@ function updateBall(dt) {
   if (b.x - b.r < 0) {
     b.x = b.r;
     b.vx = Math.abs(b.vx);
+    playSound(SOUNDS.bounce);
   } else if (b.x + b.r > CANVAS_W) {
     b.x = CANVAS_W - b.r;
     b.vx = -Math.abs(b.vx);
+    playSound(SOUNDS.bounce);
   }
   if (b.y - b.r < 0) {
     b.y = b.r;
     b.vy = Math.abs(b.vy);
+    playSound(SOUNDS.bounce);
   }
 }
 
@@ -186,6 +189,7 @@ function collideBallWithBlocks() {
     blk.alive = false;
     state.explosions.push({ x: blk.x, y: blk.y, w: blk.w, h: blk.h, color: blk.color, elapsed: 0 });
     state.score += POINTS_PER_BLOCK;
+    playSound(SOUNDS.break);
 
     // El eje con menor penetración es el del impacto; se empuja la bola fuera y se invierte ese eje.
     const fromLeft = b.x + b.r - blk.x;
