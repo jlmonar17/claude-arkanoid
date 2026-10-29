@@ -69,10 +69,23 @@ function stickBallToPaddle() {
 }
 
 function launchBall() {
-  if (state.phase !== 'ready') return;
   state.ball.vx = 0;
   state.ball.vy = -state.ball.speed;
   state.phase = 'playing';
+}
+
+function resetGame() {
+  state.blocks = createBlocks();
+  state.score = 0;
+  state.lives = INITIAL_LIVES;
+  state.phase = 'ready';
+  stickBallToPaddle();
+}
+
+// Clic o barra espaciadora: lanza la bola, o reinicia desde las pantallas finales.
+function handleAction() {
+  if (state.phase === 'ready') launchBall();
+  else if (state.phase === 'won' || state.phase === 'gameover') resetGame();
 }
 
 function updateBall(dt) {
@@ -166,7 +179,8 @@ function update(dt) {
     updateBall(dt);
     collideBallWithPaddle();
     collideBallWithBlocks();
-    if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
+    if (state.blocks.every((blk) => !blk.alive)) state.phase = 'won';
+    else if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
   }
 }
 
@@ -180,6 +194,22 @@ function draw() {
   const b = state.ball;
   drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
   drawHud();
+  if (state.phase === 'won') drawEndScreen('¡Victoria!');
+  else if (state.phase === 'gameover') drawEndScreen('Game Over');
+}
+
+function drawEndScreen(title) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 56px sans-serif';
+  ctx.fillText(title, CANVAS_W / 2, CANVAS_H / 2 - 50);
+  ctx.font = '28px sans-serif';
+  ctx.fillText('Puntaje final: ' + state.score, CANVAS_W / 2, CANVAS_H / 2 + 10);
+  ctx.font = '20px sans-serif';
+  ctx.fillText('Clic o barra espaciadora para reiniciar', CANVAS_W / 2, CANVAS_H / 2 + 60);
 }
 
 function drawHud() {
@@ -192,7 +222,7 @@ function drawHud() {
   ctx.fillText('Vidas: ' + state.lives, CANVAS_W - GRID.offsetX, 30);
 }
 
-canvas.addEventListener('mousedown', launchBall);
+canvas.addEventListener('mousedown', handleAction);
 
 // La X del ratón se pasa a coordenadas del canvas aunque CSS lo escale.
 window.addEventListener('mousemove', (e) => {
@@ -207,7 +237,7 @@ const RIGHT_KEYS = ['ArrowRight', 'd', 'D'];
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ') {
     e.preventDefault();
-    if (!e.repeat) launchBall();
+    if (!e.repeat) handleAction();
     return;
   }
   if (LEFT_KEYS.includes(e.key)) {
@@ -236,7 +266,7 @@ function loop(time) {
 
 // drawSprite no hace nada hasta que carga el atlas: el bucle arranca al cargarlo.
 loadSpritesheet(() => {
-  state.blocks = createBlocks();
+  resetGame();
   requestAnimationFrame((time) => {
     lastTime = time;
     requestAnimationFrame(loop);
