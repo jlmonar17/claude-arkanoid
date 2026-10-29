@@ -12,7 +12,10 @@ const LEVELS = [
 ];
 const LEVEL_COLOR_KEYS = { R: 'red', C: 'cyan', G: 'green', M: 'magenta', Y: 'yellow', H: 'hotpink', K: 'gray' };
 
-const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
+const BALL_BASE_SPEED = 360;
+const BALL_SPEED_STEP = 0.1; // +10 % de BALL_BASE_SPEED por nivel
+
+const GRID ={ rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
 
 const POINTS_PER_BLOCK = 10;
 const INITIAL_LIVES = 3;
@@ -31,7 +34,7 @@ const state = {
   score: 0,
   lives: INITIAL_LIVES,
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
-  ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: 360 }, // x,y = centro, velocidades en px/s
+  ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: BALL_BASE_SPEED }, // x,y = centro, velocidades en px/s
   blocks: [],
   explosions: [], // { x, y, w, h, color, elapsed } con elapsed en ms desde la rotura
   input: { lastSource: 'mouse', mouseX: CANVAS_W / 2, left: false, right: false },
@@ -90,8 +93,13 @@ function launchBall() {
   state.phase = 'playing';
 }
 
+function levelSpeed(level) {
+  return BALL_BASE_SPEED * (1 + BALL_SPEED_STEP * (level - 1));
+}
+
 function resetGame() {
   state.level = 1;
+  state.ball.speed = levelSpeed(state.level);
   state.blocks = createBlocks(state.level);
   state.explosions = [];
   state.score = 0;
@@ -248,6 +256,8 @@ function drawHud() {
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   ctx.fillText('Puntaje: ' + state.score, GRID.offsetX, 30);
+  ctx.textAlign = 'center';
+  ctx.fillText('Nivel: ' + state.level, CANVAS_W / 2, 30);
   const size = 20, gap = 8;
   for (let i = 0; i < state.lives; i++) {
     const x = CANVAS_W - GRID.offsetX - size - i * (size + gap);
