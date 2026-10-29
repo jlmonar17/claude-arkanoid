@@ -10,7 +10,9 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 const state = {
+  phase: 'ready', // 'ready' | 'playing' | 'won' | 'gameover'
   paddle: { x: (CANVAS_W - 120) / 2, y: 560, w: 120, h: 14, speed: 600 }, // x = borde izquierdo, speed en px/s
+  ball: { x: CANVAS_W / 2, y: 560 - 8, r: 8, vx: 0, vy: 0, speed: 360 }, // x,y = centro, velocidades en px/s
   blocks: [],
   input: { lastSource: 'mouse', mouseX: CANVAS_W / 2, left: false, right: false },
 };
@@ -51,8 +53,47 @@ function updatePaddle(dt) {
   clampPaddle();
 }
 
+function stickBallToPaddle() {
+  const p = state.paddle;
+  const b = state.ball;
+  b.x = p.x + p.w / 2;
+  b.y = p.y - b.r;
+  b.vx = 0;
+  b.vy = 0;
+}
+
+function launchBall() {
+  if (state.phase !== 'ready') return;
+  state.ball.vx = 0;
+  state.ball.vy = -state.ball.speed;
+  state.phase = 'playing';
+}
+
+function updateBall(dt) {
+  const b = state.ball;
+  b.x += b.vx * dt;
+  b.y += b.vy * dt;
+
+  if (b.x - b.r < 0) {
+    b.x = b.r;
+    b.vx = Math.abs(b.vx);
+  } else if (b.x + b.r > CANVAS_W) {
+    b.x = CANVAS_W - b.r;
+    b.vx = -Math.abs(b.vx);
+  }
+  if (b.y - b.r < 0) {
+    b.y = b.r;
+    b.vy = Math.abs(b.vy);
+  }
+}
+
 function update(dt) {
   updatePaddle(dt);
+  if (state.phase === 'ready') {
+    stickBallToPaddle();
+  } else if (state.phase === 'playing') {
+    updateBall(dt);
+  }
 }
 
 function draw() {
@@ -62,7 +103,11 @@ function draw() {
   }
   const p = state.paddle;
   drawSprite(ctx, 'paddle', p.x, p.y, p.w, p.h);
+  const b = state.ball;
+  drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
 }
+
+canvas.addEventListener('mousedown', launchBall);
 
 // La X del ratón se pasa a coordenadas del canvas aunque CSS lo escale.
 window.addEventListener('mousemove', (e) => {
@@ -75,6 +120,11 @@ const LEFT_KEYS = ['ArrowLeft', 'a', 'A'];
 const RIGHT_KEYS = ['ArrowRight', 'd', 'D'];
 
 window.addEventListener('keydown', (e) => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (!e.repeat) launchBall();
+    return;
+  }
   if (LEFT_KEYS.includes(e.key)) {
     state.input.left = true;
   } else if (RIGHT_KEYS.includes(e.key)) {
