@@ -218,8 +218,11 @@ function drawHud() {
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   ctx.fillText('Puntaje: ' + state.score, GRID.offsetX, 30);
-  ctx.textAlign = 'right';
-  ctx.fillText('Vidas: ' + state.lives, CANVAS_W - GRID.offsetX, 30);
+  const size = 20, gap = 8;
+  for (let i = 0; i < state.lives; i++) {
+    const x = CANVAS_W - GRID.offsetX - size - i * (size + gap);
+    drawSprite(ctx, 'ball', x, 30 - size / 2, size, size);
+  }
 }
 
 canvas.addEventListener('mousedown', handleAction);
