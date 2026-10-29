@@ -97,20 +97,26 @@ function levelSpeed(level) {
   return BALL_BASE_SPEED * (1 + BALL_SPEED_STEP * (level - 1));
 }
 
-function resetGame() {
-  state.level = 1;
-  state.ball.speed = levelSpeed(state.level);
-  state.blocks = createBlocks(state.level);
+// Carga un nivel conservando puntaje y vidas: bloques, velocidad y bola pegada a la pala.
+function loadLevel(level) {
+  state.level = level;
+  state.ball.speed = levelSpeed(level);
+  state.blocks = createBlocks(level);
   state.explosions = [];
-  state.score = 0;
-  state.lives = INITIAL_LIVES;
   state.phase = 'ready';
   stickBallToPaddle();
 }
 
-// Clic o barra espaciadora: lanza la bola, o reinicia desde las pantallas finales.
+function resetGame() {
+  state.score = 0;
+  state.lives = INITIAL_LIVES;
+  loadLevel(1);
+}
+
+// Clic o barra espaciadora: lanza la bola, pasa de nivel o reinicia desde las pantallas finales.
 function handleAction() {
   if (state.phase === 'ready') launchBall();
+  else if (state.phase === 'levelcomplete') loadLevel(state.level + 1);
   else if (state.phase === 'won' || state.phase === 'gameover') resetGame();
 }
 
