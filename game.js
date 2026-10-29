@@ -190,8 +190,9 @@ function update(dt) {
     updateBall(dt);
     collideBallWithPaddle();
     collideBallWithBlocks();
-    if (state.blocks.every((blk) => !blk.alive)) state.phase = 'won';
-    else if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
+    if (state.blocks.every((blk) => !blk.alive)) {
+      if (state.explosions.length === 0) state.phase = 'won'; // espera a que termine la última explosión
+    } else if (state.ball.y - state.ball.r > CANVAS_H) loseLife();
   }
 }
 
