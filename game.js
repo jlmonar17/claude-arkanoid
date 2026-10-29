@@ -129,6 +129,17 @@ function resetGame() {
   loadLevel(1);
 }
 
+// Salta a un nivel en cualquier fase. Desde won/gameover empieza una partida nueva en ese nivel.
+function jumpToLevel(n) {
+  if (!(n >= 1 && n <= LEVELS.length)) return;
+  if (state.phase === 'won' || state.phase === 'gameover') {
+    state.score = 0;
+    state.lives = INITIAL_LIVES;
+  }
+  state.paused = false;
+  loadLevel(n);
+}
+
 // Clic o barra espaciadora: lanza la bola, pasa de nivel o reinicia desde las pantallas finales.
 function handleAction() {
   if (state.phase === 'ready') launchBall();
@@ -346,6 +357,10 @@ window.addEventListener('keydown', (e) => {
   }
   if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
     if (!e.repeat) togglePause();
+    return;
+  }
+  if (/^[0-9]$/.test(e.key)) {
+    if (!e.repeat) jumpToLevel(Number(e.key));
     return;
   }
   if (LEFT_KEYS.includes(e.key)) {
