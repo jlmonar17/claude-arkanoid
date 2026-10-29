@@ -1,6 +1,6 @@
 # SPEC 02 — Animación de explosión al romper bloques
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-10-29
 > **Objetivo:** Reproducir sobre cada bloque roto la animación de 4 frames de `EXPLOSION_FRAMES` durante `EXPLOSION_DURATION` ms, en lugar de hacerlo desaparecer de golpe.
@@ -58,19 +58,19 @@ Convenciones:
 
 ## Criterios de aceptación
 
-- [ ] Al abrir el juego servido desde la raíz del repo, la consola no muestra errores.
-- [ ] Al romper un bloque, en su posición se ve una animación de 4 frames en lugar de desaparecer de golpe.
-- [ ] La animación dura 150 ms en total y después no queda ningún sprite en esa posición.
-- [ ] Cada color de bloque muestra los frames de su propia fila en `EXPLOSION_FRAMES`; el gris muestra los frames rojos.
-- [ ] La explosión se dibuja con el mismo tamaño (68 × 24) y posición que tenía el bloque.
-- [ ] El puntaje sube exactamente 10 en el instante del golpe, sin esperar al fin de la animación.
-- [ ] La bola atraviesa la zona de una explosión activa sin rebotar.
+- [x] Al abrir el juego servido desde la raíz del repo, la consola no muestra errores.
+- [x] Al romper un bloque, en su posición se ve una animación de 4 frames en lugar de desaparecer de golpe.
+- [x] La animación dura 150 ms en total y después no queda ningún sprite en esa posición.
+- [x] Cada color de bloque muestra los frames de su propia fila en `EXPLOSION_FRAMES`; el gris muestra los frames rojos.
+- [x] La explosión se dibuja con el mismo tamaño (68 × 24) y posición que tenía el bloque.
+- [x] El puntaje sube exactamente 10 en el instante del golpe, sin esperar al fin de la animación.
+- [x] La bola atraviesa la zona de una explosión activa sin rebotar.
 - [ ] Romper varios bloques en rápida sucesión muestra varias explosiones a la vez, cada una con su propio progreso.
-- [ ] Al romper el último bloque, la animación se completa y recién después aparece la pantalla de victoria con 700 puntos.
-- [ ] Si se pierde una vida o se llega a `gameover` mientras hay explosiones activas, estas terminan su animación.
-- [ ] Al reiniciar desde la victoria o el game over, `state.explosions` queda vacío y no se ven restos de explosiones.
-- [ ] No se reproduce ningún sonido en todo el juego.
-- [ ] `CLAUDE.md` ya no lista `EXPLOSION_FRAMES` / `EXPLOSION_DURATION` como "no usados".
+- [x] Al romper el último bloque, la animación se completa y recién después aparece la pantalla de victoria con 700 puntos.
+- [x] Si se pierde una vida o se llega a `gameover` mientras hay explosiones activas, estas terminan su animación.
+- [x] Al reiniciar desde la victoria o el game over, `state.explosions` queda vacío y no se ven restos de explosiones.
+- [x] No se reproduce ningún sonido en todo el juego.
+- [x] `CLAUDE.md` ya no lista `EXPLOSION_FRAMES` / `EXPLOSION_DURATION` como "no usados".
 
 ## Decisiones tomadas y descartadas
 
