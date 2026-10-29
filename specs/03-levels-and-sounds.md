@@ -1,6 +1,6 @@
 # SPEC 03 — Niveles, sonidos, pausa y salto de nivel
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-10-29
 > **Objetivo:** Añadir 5 niveles con layouts distintos y bola un 10 % más rápida en cada uno, y reproducir `ball-bounce.mp3` cuando la bola rebota en la pala, las paredes o el techo y `break-sound.mp3` cuando se rompe un bloque, con pausa (`P` / `Escape`) y salto directo a un nivel con las teclas 1 a 5 para facilitar las pruebas.
