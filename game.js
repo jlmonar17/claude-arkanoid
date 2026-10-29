@@ -200,6 +200,10 @@ function draw() {
   for (const b of state.blocks) {
     if (b.alive) drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
   }
+  for (const e of state.explosions) {
+    const frame = Math.min(EXPLOSION_FRAME_COUNT - 1, Math.floor(e.elapsed / (EXPLOSION_DURATION / EXPLOSION_FRAME_COUNT)));
+    drawFrame(ctx, EXPLOSION_FRAMES[e.color][frame], e.x, e.y, e.w, e.h);
+  }
   const p = state.paddle;
   drawSprite(ctx, 'paddle', p.x, p.y, p.w, p.h);
   const b = state.ball;
