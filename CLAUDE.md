@@ -4,9 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## State of the project
 
-Pre-implementation. No game code, build system, package manager, linter or tests exist yet — only `README.md`, `assets/` and spec-driven-workflow skills. There are no build/lint/test commands to document; add them here once they exist.
+Spec 01 (`specs/01-arkanoid-mvp.md`) implements a playable MVP in the browser (HTML + Canvas + JS, no modules or build): `index.html` loads `assets/spritesheet.js` and `game.js` with plain `<script>` tags. The stack decision is settled: browser/Canvas, not Pygame (the README describes this).
 
-`README.md` (Spanish) describes an Arkanoid game "developed in Python with Pygame" and says it is not yet implemented. However, `assets/spritesheet.js` is browser JavaScript (Canvas 2D `ctx.drawImage`, `Image`, `document`-style loading). The stack is therefore unresolved: confirm with the user (or an approved spec) before choosing Pygame vs. browser/Canvas. If JS is chosen, `assets/spritesheet.js` is meant to be loaded via a plain `<script>` (it defines globals, no modules/exports).
+- Run: serve the repo root with a static server (e.g. `python3 -m http.server 8000`) and open `http://localhost:8000`. Do not use `file://` (the sprite PNG would taint the canvas).
+- `game.js` keeps all state in a single `state` object (`phase`: `ready | playing | won | gameover`) and runs a `requestAnimationFrame` loop started inside the `loadSpritesheet` callback.
+- No package manager, linter or automated tests exist; verification is manual in the browser.
+- Not used yet: `assets/sounds/*`, `EXPLOSION_FRAMES` / `EXPLOSION_DURATION` (out of scope for spec 01).
 
 ## Assets
 
