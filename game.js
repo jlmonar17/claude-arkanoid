@@ -5,6 +5,7 @@ const BLOCK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'g
 const GRID = { rows: 7, cols: 10, blockW: 68, blockH: 24, gap: 4, offsetX: 42, offsetY: 60 };
 
 const MAX_DT = 0.05;
+const MAX_BOUNCE_ANGLE = 60 * Math.PI / 180; // respecto a la vertical, en el borde de la pala
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -87,12 +88,30 @@ function updateBall(dt) {
   }
 }
 
+function collideBallWithPaddle() {
+  const b = state.ball;
+  const p = state.paddle;
+  if (b.vy <= 0) return;
+  const overlaps =
+    b.x + b.r >= p.x && b.x - b.r <= p.x + p.w &&
+    b.y + b.r >= p.y && b.y - b.r <= p.y + p.h;
+  if (!overlaps) return;
+
+  // -1 en el borde izquierdo, +1 en el derecho. La rapidez se mantiene constante.
+  const hit = Math.max(-1, Math.min(1, (b.x - (p.x + p.w / 2)) / (p.w / 2)));
+  const angle = hit * MAX_BOUNCE_ANGLE;
+  b.vx = b.speed * Math.sin(angle);
+  b.vy = -b.speed * Math.cos(angle);
+  b.y = p.y - b.r;
+}
+
 function update(dt) {
   updatePaddle(dt);
   if (state.phase === 'ready') {
     stickBallToPaddle();
   } else if (state.phase === 'playing') {
     updateBall(dt);
+    collideBallWithPaddle();
   }
 }
 
